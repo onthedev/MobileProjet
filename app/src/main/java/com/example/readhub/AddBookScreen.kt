@@ -7,6 +7,7 @@ import android.provider.OpenableColumns
 import android.webkit.MimeTypeMap
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -20,12 +21,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FabPosition
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -68,6 +73,7 @@ fun AddBookScreen(navController: NavHostController){
 
     var selectedItems by remember { mutableStateOf(mutableListOf<String>()) }
     var bookUri by remember { mutableStateOf<Uri?>(null) }
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
 
     lateinit var sharedPreferences: SharedPreferencesManager
     sharedPreferences = SharedPreferencesManager(context = contextForToast)
@@ -89,6 +95,16 @@ fun AddBookScreen(navController: NavHostController){
         }
     )
 
+
+    val imageLauncher: ActivityResultLauncher<String> = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { result: Uri? ->
+            result?.let {
+                imageUri = result
+            }
+        }
+    )
+
     if (sharedPreferences.isLoggedIn) {
         Scaffold(
             topBar = { MyTopAppBar(navController, contextForToast) },
@@ -98,73 +114,118 @@ fun AddBookScreen(navController: NavHostController){
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
                     .padding(paddingValues = paddingValues),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(text = "ลงหนังสือ",
                     style = TextStyle(
                         fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp,
+                        fontSize = 24.sp,
                         color = Color.Black
                     )
                 )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                OutlinedTextField(
-                    value = textFieldTitle,
-                    onValueChange = {textFieldTitle = it},
-                    label = { Text(text = "Enter Title")}
-                )
-                OutlinedTextField(
-                    value = textFieldDesc,
-                    onValueChange = { textFieldDesc = it },
-                    label = { Text(text = "Enter Book Description") },
-                    modifier = Modifier
-                        .height(100.dp)
-                )
-
-                OutlinedTextField(
-                    value = textFieldWriter,
-                    onValueChange = {textFieldWriter = it},
-                    label = { Text(text = "Enter Writer Name")}
-                )
-                OutlinedTextField(
-                    value = textFieldPubl,
-                    onValueChange = {textFieldPubl = it},
-                    label = { Text(text = "Enter Publishing")}
-                )
-                menuDropdown(menu = category, onMenuChange = { category = it })
                 Spacer(modifier = Modifier.height(16.dp))
                 Box(
                     modifier = Modifier
-                        .width(280.dp)
-                        .height(90.dp)
-                        .border(
-                            width = 1.dp,
-                            color = Color.Black,
-                        )
+                        .height(270.dp)
+                        .border(1.dp, Color.Gray)
+                        .padding(20.dp),
+                    contentAlignment = Alignment.Center
                 ){
                     Column(
-                        modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            TextButton(
-                                modifier = Modifier.weight(1f),
-                                onClick = {
-                                    documentLauncher.launch(arrayOf("application/pdf"))
-                                }
-                            ) {
-                                Text(text = "Add File")
+                        Text(text = "รายละเอียดหนังสือ",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        OutlinedTextField(
+                            value = textFieldTitle,
+                            onValueChange = {textFieldTitle = it},
+                            label = { Text(text = "Enter Title")}
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        OutlinedTextField(
+                            value = textFieldDesc,
+                            onValueChange = { textFieldDesc = it },
+                            label = { Text(text = "Enter Book Description") },
+                            modifier = Modifier.height(150.dp)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Box(
+                    modifier = Modifier
+                        .height(200.dp)
+                        .border(1.dp, Color.Gray)
+                        .padding(20.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(text = "รายละเอียดผู้เขียน",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp)
+                        OutlinedTextField(
+                            value = textFieldWriter,
+                            onValueChange = { textFieldWriter = it },
+                            label = { Text(text = "Enter Writer Name") }
+                        )
+                        OutlinedTextField(
+                            value = textFieldPubl,
+                            onValueChange = { textFieldPubl = it },
+                            label = { Text(text = "Enter Publishing") }
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(text = "ประเภทหนังสือ",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp)
+                menuDropdown(menu = category, onMenuChange = { category = it })
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Box(
+                    modifier = Modifier
+                        .width(270.dp)
+                        .height(260.dp)
+                        .border(
+                            width = 1.dp,
+                            color = Color.Gray,
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier.padding(20.dp)
+
+                    ) {
+                        Text(text = "ไฟล์หนังสือ",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp
+                        )
+                        TextButton(
+                            modifier = Modifier.weight(1f),
+                            onClick = {
+                                documentLauncher.launch(arrayOf("application/pdf"))
                             }
+                        ) {
+                            Text(text = "Add File")
                         }
 
                         if (bookUri != null) {
@@ -172,13 +233,45 @@ fun AddBookScreen(navController: NavHostController){
                             Text(
                                 text = "$fileName",
                             )
-                        }else{
+                        } else {
                             Text(
                                 text = "ยังไม่เพิ่มไฟล์",
                             )
                         }
-                    }
 
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        HorizontalDivider(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                            thickness = 1.dp,
+                            color = Color.Gray
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Text(text = "ไฟล์หน้าปกหนังสือ",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp
+                        )
+                        TextButton(
+                            modifier = Modifier.weight(1f),
+                            onClick = {
+                                imageLauncher.launch("image/*")
+                            }
+                        ) {
+                            Text(text = "Add Picture")
+                        }
+                        if (imageUri != null) {
+                            val fileName = getImgName(contextForToast, imageUri!!)
+                            Text(
+                                text = "$fileName",
+                            )
+                        } else {
+                            Text(
+                                text = "ยังไม่เพิ่มไฟล์หน้าปก",
+                            )
+                        }
+                    }
                 }
                 Row (
                     modifier = Modifier
@@ -186,71 +279,88 @@ fun AddBookScreen(navController: NavHostController){
                         .padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
-                ){Button(
-                    modifier = Modifier.width(130.dp),
-                    onClick = {
-                        val inputStream = contextForToast.contentResolver.openInputStream(bookUri!!)
-                            ?: throw Exception("Failed to open input stream")
-                        val bookFile = File.createTempFile("book", ".pdf")
-                        val outputStream = FileOutputStream(bookFile)
-                        inputStream.copyTo(outputStream)
-                        inputStream.close()
-                        outputStream.close()
+                ){
+                    Button(
+                        modifier = Modifier.width(130.dp),
+                        onClick = {
+                            val inputStream = contextForToast.contentResolver.openInputStream(bookUri!!)
+                                ?: throw Exception("Failed to open input stream")
 
-                        val requestBody = bookFile.asRequestBody("book/pdf".toMediaTypeOrNull())
+                            val bookFile = File.createTempFile("book", ".pdf")
+                            val imgFile = File.createTempFile("img", ".jpg")
 
-                        val bookPart = MultipartBody.Part.createFormData(
-                            "bookPart",
-                            bookFile.name, requestBody
-                        )
+                            val outputStream = FileOutputStream(bookFile)
+                            inputStream.copyTo(outputStream)
+                            inputStream.close()
+                            outputStream.close()
 
-                        val titleRequestBody =
-                            textFieldTitle.toRequestBody("text/plain".toMediaTypeOrNull())
-                        val DescRequestBody =
-                            textFieldDesc.toRequestBody("text/plain".toMediaTypeOrNull())
-                        val WriterRequestBody =
-                            textFieldWriter.toRequestBody("text/plain".toMediaTypeOrNull())
-                        val PublRequestBody =
-                            textFieldPubl.toRequestBody("text/plain".toMediaTypeOrNull())
-                        val CatagRequestBody =
-                            category.toRequestBody("text/plain".toMediaTypeOrNull())
+                            val bookRequestBody = bookFile.asRequestBody("book/pdf".toMediaTypeOrNull())
+                            val imgRequestBody = imgFile.asRequestBody("image/jpeg".toMediaTypeOrNull())
 
-                        createClient.uploadFile(
-                            bookPart, titleRequestBody, DescRequestBody,WriterRequestBody,PublRequestBody,CatagRequestBody
-                        ).enqueue(object : Callback<Book> {
-                            override fun onResponse(
-                                call: retrofit2.Call<Book>,
-                                response: retrofit2.Response<Book>
-                            ) {
-                                if (response.isSuccessful) {
+                            val bookPart = MultipartBody.Part.createFormData(
+                                "bookPart",
+                                bookFile.name,
+                                bookRequestBody
+                            )
+                            val imgPart = MultipartBody.Part.createFormData(
+                                "imgPart",
+                                imgFile.name,
+                                imgRequestBody
+                            )
+                            val user_id = sharedPreferences.userId
+
+
+                            val titleRequestBody =
+                                textFieldTitle.toRequestBody("text/plain".toMediaTypeOrNull())
+                            val DescRequestBody =
+                                textFieldDesc.toRequestBody("text/plain".toMediaTypeOrNull())
+                            val WriterRequestBody =
+                                textFieldWriter.toRequestBody("text/plain".toMediaTypeOrNull())
+                            val PublRequestBody =
+                                textFieldPubl.toRequestBody("text/plain".toMediaTypeOrNull())
+                            val CatagRequestBody =
+                                category.toRequestBody("text/plain".toMediaTypeOrNull())
+
+                            val useridRequestBody =
+                                user_id!!.toRequestBody("text/plain".toMediaTypeOrNull())
+
+                            println("check userid:"+useridRequestBody)
+                            createClient.uploadFile(
+                                bookPart, imgPart,titleRequestBody, DescRequestBody,WriterRequestBody,PublRequestBody,CatagRequestBody, useridRequestBody
+                            ).enqueue(object : Callback<Book> {
+                                override fun onResponse(
+                                    call: retrofit2.Call<Book>,
+                                    response: retrofit2.Response<Book>
+                                ) {
+                                    if (response.isSuccessful) {
+                                        Toast.makeText(
+                                            contextForToast, "Successfully Insert",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    } else {
+                                        println(bookPart.toString()+titleRequestBody.toString()+DescRequestBody.toString()+WriterRequestBody.toString()+PublRequestBody.toString()+CatagRequestBody.toString())
+                                        Toast.makeText(
+                                            contextForToast, "Error",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                }
+
+                                override fun onFailure(call: retrofit2.Call<Book>, t: Throwable) {
                                     Toast.makeText(
-                                        contextForToast, "Successfully Insert",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                } else {
-                                    println(bookPart.toString()+titleRequestBody.toString()+DescRequestBody.toString()+WriterRequestBody.toString()+PublRequestBody.toString()+CatagRequestBody.toString())
-                                    Toast.makeText(
-                                        contextForToast, "Error",
+                                        contextForToast, "Error onFailor" + t.message,
                                         Toast.LENGTH_SHORT
                                     ).show()
                                 }
+                            })
+                            if (navController.currentBackStack.value.size >= 2) {
+                                navController.popBackStack()
                             }
-
-                            override fun onFailure(call: retrofit2.Call<Book>, t: Throwable) {
-                                Toast.makeText(
-                                    contextForToast, "Error onFailor" + t.message,
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        })
-                        if (navController.currentBackStack.value.size >= 2) {
-                            navController.popBackStack()
+                            navController.navigate(Screen.Home.route)
                         }
-                        navController.navigate(Screen.Home.route)
+                    ) {
+                        Text(text = "Save")
                     }
-                ) {
-                    Text(text = "Save")
-                }
                     Spacer(modifier = Modifier.width(16.dp))
                     Button(
                         modifier = Modifier.width(130.dp),
@@ -267,11 +377,13 @@ fun AddBookScreen(navController: NavHostController){
                     }
                 }
             }
+
         }
     } else {
         navController.navigate(Screen.Login.route)
     }
 }
+
 
 
 fun isPdfFile(uri: Uri): Boolean {
@@ -281,6 +393,22 @@ fun isPdfFile(uri: Uri): Boolean {
 }
 
 fun getFileName(context: Context, uri: Uri): String? {
+    var fileName: String? = null
+
+    if ("content".equals(uri.scheme, ignoreCase = true)) {
+        context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val displayName = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                fileName = cursor.getString(displayName)
+            }
+        }
+    } else if ("file".equals(uri.scheme, ignoreCase = true)) {
+        fileName = File(uri.path!!).name
+    }
+
+    return fileName
+}
+fun getImgName(context: Context, uri: Uri): String? {
     var fileName: String? = null
 
     if ("content".equals(uri.scheme, ignoreCase = true)) {

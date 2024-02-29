@@ -26,7 +26,7 @@ interface UserApi {
         @Field("user_name") user_name:String,
         @Field("email") email:String,
         @Field("password") password:String,
-        ): Call<LoginClass>
+    ): Call<LoginClass>
 
     @FormUrlEncoded
     @POST("/addUserInterested")
@@ -43,12 +43,15 @@ interface UserApi {
     @POST("/insertUpload")
     fun uploadFile(
         @Part bookPart: MultipartBody.Part,
+        @Part imgPart: MultipartBody.Part,  // เพิ่ม Part สำหรับรับไฟล์รูปภาพ
         @Part("book_name") bookName: RequestBody,
         @Part("description") description: RequestBody,
         @Part("writer_name") writer_name: RequestBody,
         @Part("pub_name") pub_name: RequestBody,
         @Part("catagory") catagory: RequestBody,
+        @Part("user_id") user_id: RequestBody
         ): Call<Book>
+
 //    @FormUrlEncoded
 //    @POST("/insertBook")
 //    fun insertBook(

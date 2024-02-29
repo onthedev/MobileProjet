@@ -8,6 +8,9 @@ data class Book(
     @SerializedName("book_img") val book_img: String,
 
     @Expose
+    @SerializedName("book_path") val book_path: String,
+
+    @Expose
     @SerializedName("book_name") val book_name: String,
 
     @Expose
