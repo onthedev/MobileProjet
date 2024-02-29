@@ -283,16 +283,25 @@ fun AddBookScreen(navController: NavHostController){
                     Button(
                         modifier = Modifier.width(130.dp),
                         onClick = {
-                            val inputStream = contextForToast.contentResolver.openInputStream(bookUri!!)
-                                ?: throw Exception("Failed to open input stream")
+                            val inputStreamBook = contextForToast.contentResolver.openInputStream(bookUri!!)
+                                ?: throw Exception("Failed to open input stream for book")
+
+                            val inputStreamImg = contextForToast.contentResolver.openInputStream(imageUri!!)
+                                ?: throw Exception("Failed to open input stream for img")
 
                             val bookFile = File.createTempFile("book", ".pdf")
                             val imgFile = File.createTempFile("img", ".jpg")
 
-                            val outputStream = FileOutputStream(bookFile)
-                            inputStream.copyTo(outputStream)
-                            inputStream.close()
-                            outputStream.close()
+                            val outputStreamBook = FileOutputStream(bookFile)
+                            inputStreamBook.copyTo(outputStreamBook)
+                            inputStreamBook.close()
+                            outputStreamBook.close()
+
+                            val outputStreamImg = FileOutputStream(imgFile)
+                            inputStreamImg.copyTo(outputStreamImg)
+                            inputStreamImg.close()
+                            outputStreamImg.close()
+
 
                             val bookRequestBody = bookFile.asRequestBody("book/pdf".toMediaTypeOrNull())
                             val imgRequestBody = imgFile.asRequestBody("image/jpeg".toMediaTypeOrNull())
@@ -324,7 +333,7 @@ fun AddBookScreen(navController: NavHostController){
                             val useridRequestBody =
                                 user_id!!.toRequestBody("text/plain".toMediaTypeOrNull())
 
-                            println("check userid:"+useridRequestBody)
+                            println("check userid:"+user_id)
                             createClient.uploadFile(
                                 bookPart, imgPart,titleRequestBody, DescRequestBody,WriterRequestBody,PublRequestBody,CatagRequestBody, useridRequestBody
                             ).enqueue(object : Callback<Book> {
