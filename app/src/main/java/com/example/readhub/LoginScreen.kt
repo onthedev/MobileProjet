@@ -23,6 +23,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -39,6 +41,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -47,6 +50,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavHostController
 import retrofit2.Call
 import retrofit2.Callback
@@ -70,25 +74,25 @@ fun LoginScreen(navController: NavHostController) {
     lateinit var sharedPreferences: SharedPreferencesManager
     sharedPreferences = SharedPreferencesManager(context = contextForToast)
 
-//    val lifecycleOwner = LocalLifecycleOwner.current
-//    val lifecycleState by lifecycleOwner.lifecycle.currentStateFlow.collectAsState()
-//    LaunchedEffect(lifecycleState){
-    //       when(lifecycleState){
-//            Lifecycle.State.DESTROYED -> {}
-//            Lifecycle.State.INITIALIZED -> {}
-    //           Lifecycle.State.CREATED -> {}
-    //          Lifecycle.State.STARTED -> {}
-    //           Lifecycle.State.RESUMED -> {
-    //              if(sharedPreferences.isLoggedIn){
-    //                  navController.navigate(Screen.Home.route)
-    //              }
-    //              if(!sharedPreferences.userId.isNullOrEmpty()){
-    //                 userName = sharedPreferences.userId?:"1"
-    //             }
-    //         }
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val lifecycleState by lifecycleOwner.lifecycle.currentStateFlow.collectAsState()
+    LaunchedEffect(lifecycleState){
+           when(lifecycleState){
+            Lifecycle.State.DESTROYED -> {}
+            Lifecycle.State.INITIALIZED -> {}
+               Lifecycle.State.CREATED -> {}
+              Lifecycle.State.STARTED -> {}
+               Lifecycle.State.RESUMED -> {
+                  if(sharedPreferences.isLoggedIn){
+                      navController.navigate(Screen.Home.route)
+                  }
+                  if(!sharedPreferences.userId.isNullOrEmpty()){
+                     userName = sharedPreferences.userId?:"1"
+                 }
+             }
 
-    //     }
-    //   }
+         }
+       }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -243,7 +247,7 @@ fun LoginScreen(navController: NavHostController) {
                                         } else {
                                             Toast.makeText(
                                                 contextForToast,
-                                                "Student ID or password is incorrect.",
+                                                "Username not found or password is incorrect.",
                                                 Toast.LENGTH_LONG
                                             ).show()
                                         }
@@ -251,7 +255,7 @@ fun LoginScreen(navController: NavHostController) {
                                         studentItems.clear()
                                         Toast.makeText(
                                             contextForToast,
-                                            "Student ID Not Found",
+                                            "Username not found",
                                             Toast.LENGTH_LONG
                                         ).show()
                                     }

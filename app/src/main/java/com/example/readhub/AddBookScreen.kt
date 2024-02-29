@@ -24,6 +24,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,6 +34,7 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -79,8 +83,9 @@ fun AddBookScreen(navController: NavHostController){
     sharedPreferences = SharedPreferencesManager(context = contextForToast)
 
     var category by rememberSaveable { mutableStateOf("") }
+    var stateDialog by remember { mutableStateOf(false)}
 
-    val documentLauncher = rememberLauncherForActivityResult(
+        val documentLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument(),
         onResult = { uri ->
             uri?.let {
@@ -242,7 +247,9 @@ fun AddBookScreen(navController: NavHostController){
                         Spacer(modifier = Modifier.height(16.dp))
 
                         HorizontalDivider(
-                            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
                             thickness = 1.dp,
                             color = Color.Gray
                         )
@@ -363,9 +370,9 @@ fun AddBookScreen(navController: NavHostController){
                                 }
                             })
                             if (navController.currentBackStack.value.size >= 2) {
+                                stateDialog = true
                                 navController.popBackStack()
                             }
-                            navController.navigate(Screen.Home.route)
                         }
                     ) {
                         Text(text = "Save")
@@ -384,6 +391,24 @@ fun AddBookScreen(navController: NavHostController){
                         }) {
                         Text(text = "Cancel")
                     }
+                            if (stateDialog) {
+                                AlertDialog(
+                                    onDismissRequest = { stateDialog = false },
+                                    title = { Text(text = "ลงหนังสือสำเร็จ")},
+                                    text = { Text(text = "เผยแพร่หนังสือ ${textFieldTitle} เรียบร้อยแล้ว") },
+                                    icon = {
+                                        Icon(imageVector = Icons.Default.Info, contentDescription = "Information")
+                                    },
+                                    confirmButton = {
+                                        TextButton(onClick = { stateDialog = false
+                                            navController.navigate(Screen.Profile.route)
+                                        }) {
+                                            Text("OK")
+                                        }
+                                    }
+                                )
+                            }
+
                 }
             }
 

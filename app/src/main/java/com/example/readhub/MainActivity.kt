@@ -5,18 +5,11 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Logout
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -25,7 +18,6 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -37,8 +29,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.readhub.ui.theme.ReadHubTheme
@@ -101,67 +91,7 @@ fun MyTopAppBar(navController: NavHostController, contextForToast: Context) {
             containerColor = Color(0xFF0088CC)
         ),
     )
-    if (logoutDialog) {
-        AlertDialog(
-            onDismissRequest = { logoutDialog = false },
-            icon = {
-                Icon(imageVector = Icons.Default.Warning, contentDescription = "Warning")
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        logoutDialog = false
-                        sharedPreferences.isLoggedIn = false
-                        sharedPreferences.ControlShow = false
-                        if (checkedState) {
-                            sharedPreferences.clearUserLogin()
-                            Toast.makeText(contextForToast, "Clear user login.", Toast.LENGTH_SHORT).show()
-                        } else {
-                            sharedPreferences.clearUserAll()
-                            Toast.makeText(contextForToast, "Clear user login and e-mail.", Toast.LENGTH_SHORT).show()
-                        }
-                        if (navController.currentBackStack.value.size >= 2) {
-                            navController.popBackStack()
-                            println(sharedPreferences.isLoggedIn)
-                        }
-                        navController.navigate(Screen.Login.route)
-                    }
-                ) {
-                    Text(text = "Yes")
-                }
-            }
-            ,
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        logoutDialog = false
-                        Toast.makeText(contextForToast, "Click on no",Toast.LENGTH_SHORT).show()
-                    }
-                ){ Text(text = "No")}
-            },
-            title = { Text(text = "Logout")},
-            text = { Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(text = "Are you sure you want to log out?",
-                    fontSize = 16.sp)
-                Row (
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Start
-                ){
-                    Checkbox(
-                        checked = checkedState,
-                        onCheckedChange = {
-                                isChecked->
-                            checkedState = isChecked
-                        })
-                    Spacer(modifier = Modifier.size(8.dp))
-                    Text(text = "Remember my username")
-                }
-            }
-            }
-        )
-    }
+
 }
 
 @Composable
